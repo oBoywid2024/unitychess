@@ -6,11 +6,12 @@ public class Game : MonoBehaviour
 {
     public GameObject chesspiece;
 
-    //Positions and teams for each piece
+    // Positions and teams for each piece
     private GameObject[,] positions = new GameObject[8, 8];
     private GameObject[] playerWhite = new GameObject[16];
     private GameObject[] playerBlack = new GameObject[16];
 
+    // Gamestate variables
     private string currentPlayer = "white";
     private bool gameOver = false;
     
@@ -37,6 +38,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Creates, names, and places piece
     public GameObject Create(string name, int x, int y)
     {
         GameObject obj = Instantiate(chesspiece, new Vector3(0, 0, -1), Quaternion.identity);

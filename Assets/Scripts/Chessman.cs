@@ -2,29 +2,30 @@ using UnityEngine;
 
 public class Chessman : MonoBehaviour
 {
-    //Object References
+    // Object References
     public GameObject controller;
     public GameObject movePlate;
 
-    //Positions
+    // Positions (Default = Off-Board)
     private int xBoard = -1;
     private int yBoard = -1;
 
-    //Player Color
+    // Player Color
     private string player;
 
-    //Sprite References
-    //All possible sprites that our Chessman can be.
+    // Sprite References: All possible sprites that our Chessmen can be.
     public Sprite white_king, white_queen, white_rook, white_bishop, white_knight, white_pawn;
     public Sprite black_king, black_queen, black_rook, black_bishop, black_knight, black_pawn;
 
+    // Puts digital piece on visual board and gives it the proper sprite
     public void Activate()
     {
         controller = GameObject.FindGameObjectWithTag("GameController");
 
-        //Take xBoard and yBoard positions and transform them to match with Board in-game
+        // Take xBoard and yBoard positions and transform them to match with Board in-game
         SetCoords();
 
+        // Absolute knightmare of a switch statement. Will not change.
         switch (this.name)
         {
             case "white_king": this.GetComponent<SpriteRenderer>().sprite = white_king; player = "white"; break;
@@ -43,20 +44,19 @@ public class Chessman : MonoBehaviour
         }
     }
 
+    // Take xBoard and yBoard positions and transform them to match with Board in-game
     public void SetCoords()
     {
         float x = xBoard;
         float y = yBoard;
 
-        x *= 0.66f;
-        y *= 0.66f;
-
-        x += -2.3f;
-        y += -2.3f;
+        x *= 0.66f; y *= 0.66f;
+        x += -2.3f; y += -2.3f;
 
         this.transform.position = new Vector3(x, y, -1.0f);
     }
 
+    // xBoard and yBoard Get-Sets
     public int GetXBoard()
     {
         return xBoard;
@@ -65,7 +65,6 @@ public class Chessman : MonoBehaviour
     {
         return yBoard;
     }
-
     public void SetXBoard(int x)
     {
         xBoard = x;
@@ -75,8 +74,10 @@ public class Chessman : MonoBehaviour
         yBoard = y;
     }
 
+    // Built-In Unity Function | Executes upon lifting Left Click
     private void OnMouseUp()
     {
+        // If the game is still going and it's our move, destroy old moveplates and make new ones at the current piece.
         if (!controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == player)
         {
             DestroyMovePlates();
@@ -84,6 +85,7 @@ public class Chessman : MonoBehaviour
         }
     }
 
+    // Destroys all moveplates
     public void DestroyMovePlates()
     {
         GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovePlate");
@@ -93,6 +95,7 @@ public class Chessman : MonoBehaviour
         }
     }
 
+    // Spawns varrying moveplates depending on selected piece
     public void InitiateMovePlates()
     {
         switch (this.name)
@@ -139,7 +142,7 @@ public class Chessman : MonoBehaviour
         }
     }
 
-    // Queen/Rook/Bishop Line Movement
+    // Queen/Rook/Bishop | Spawns moveplates in line.
     public void LineMovePlate(int xIncrement, int yIncrement)
     {
         Game sc = controller.GetComponent<Game>();
@@ -160,7 +163,7 @@ public class Chessman : MonoBehaviour
         }
     }
 
-    // Knight L-Movement
+    // Knight | Spawns moveplates in L-Pattern
     public void LMovePlate()
     {
         PointMovePlate(xBoard - 1, yBoard - 2);
@@ -173,7 +176,7 @@ public class Chessman : MonoBehaviour
         PointMovePlate(xBoard + 2, yBoard + 1);
     }
 
-    // King Donut Movement
+    // King | Donut moveplates
     public void SurroundMovePlate()
     {
         PointMovePlate(xBoard + 1, yBoard + 1);
@@ -187,17 +190,19 @@ public class Chessman : MonoBehaviour
         PointMovePlate(xBoard - 1, yBoard - 1);
     }
 
-    // General Single-Square Movement | Base for all other moveplates
+    // General Single-Square Movement; Base for most other moveplates
     public void PointMovePlate(int x, int y)
     {
         Game sc = controller.GetComponent<Game>();
         if (sc.PositionOnBoard(x, y))
         {
             GameObject cp = sc.GetPosition(x, y);
+            // No piece at desired location? Spawn MovePlate
             if (cp == null)
             {
                 MovePlateSpawn(x, y);
             }
+            // Piece in the way; Not friendly. EX-TER-MIN-ATE
             else if (cp.GetComponent<Chessman>().player != player)
             {
                 MovePlateAttackSpawn(x, y);
@@ -217,6 +222,7 @@ public class Chessman : MonoBehaviour
             {
                 MovePlateSpawn(x, y);
 
+                // Double-Moving
                 if (player == "white" && yBoard == 1 && sc.GetPosition(x, y + 1) == null)
                 {
                     MovePlateSpawn(x, y + 1);
@@ -241,16 +247,15 @@ public class Chessman : MonoBehaviour
         }
     }
 
+    // Spawn MovePlate at board coordinates
     public void MovePlateSpawn(int matrixX, int matrixY)
     {
         float x = matrixX;
         float y = matrixY;
 
-        x *= 0.66f;
-        y *= 0.66f;
-
-        x += -2.3f;
-        y += -2.3f;
+        // Board -> Game
+        x *= 0.66f; y *= 0.66f;
+        x += -2.3f; y += -2.3f;
 
         GameObject mp = Instantiate(movePlate, new Vector3(x, y, -3.0f), Quaternion.identity);
 
@@ -259,21 +264,20 @@ public class Chessman : MonoBehaviour
         mpScript.SetCoords(matrixX, matrixY);
     }
 
+    // Spawn Attacking MovePlate at board coordinates
     public void MovePlateAttackSpawn(int matrixX, int matrixY)
     {
         float x = matrixX;
         float y = matrixY;
 
-        x *= 0.66f;
-        y *= 0.66f;
-
-        x += -2.3f;
-        y += -2.3f;
+        // Board -> Game
+        x *= 0.66f; y *= 0.66f;
+        x += -2.3f; y += -2.3f;
 
         GameObject mp = Instantiate(movePlate, new Vector3(x, y, -3.0f), Quaternion.identity);
 
         MovePlate mpScript = mp.GetComponent<MovePlate>();
-        mpScript.attack = true;
+        mpScript.attack = true; // Attack mode
         mpScript.SetReference(gameObject);
         mpScript.SetCoords(matrixX, matrixY);
     }
